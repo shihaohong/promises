@@ -51,7 +51,7 @@ describe('Basic chaining', function() {
         })
         .catch(done);
     });
-
+    
     afterEach(function() {
       fs.writeFileSync(fileToWriteTo, '');
     });

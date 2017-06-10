@@ -10,11 +10,36 @@
 
 var fs = require('fs');
 var Promise = require('bluebird');
-
-
+var promisification = require('./promisification.js');
+var promiseConstructor = require('./promiseConstructor.js');
 
 var fetchProfileAndWriteToFile = function(readFilePath, writeFilePath) {
-  // TODO
+  var promise = new Promise((resolve, reject) => {
+    // read github username from readFilePath (first line of file)
+    return promiseConstructor.pluckFirstLineFromFileAsync(readFilePath)
+      .then(function(firstLine) {
+        return promisification.getGitHubProfileAsync(firstLine);
+      })
+      .then(function(body) {
+        var stringifiedBody = JSON.stringify(body);
+        if (body) {
+          fs.writeFile(writeFilePath, stringifiedBody, function(err, content) {
+            if (err) {
+              reject(err);
+            } else {
+              resolve('Write completed');
+            }
+          });
+        } else {
+          throw new Error('message body not found!');
+        }
+      })
+      .catch(function(err) {
+        return err;
+      });
+  });
+
+  return promise;
 };
 
 // Export these functions so we can test them
